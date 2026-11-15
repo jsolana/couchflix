@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# COUCHFLIX launcher: checks requirements, prepares the venv, then starts the app.
+#   ./couchflix        run the app      ./couchflix test    run unit + acceptance tests
+set -euo pipefail
+cd "$(dirname "$0")"
+PY=${PYTHON:-python3}
+"$PY" -c 'import sys; sys.exit(sys.version_info < (3, 11))' 2>/dev/null || { echo "COUCHFLIX necesita Python 3.11 o superior."; exit 1; }
+
+EXTRAS=""; [ "${1:-}" = "test" ] && EXTRAS="[dev]"
+if [ ! -x .venv/bin/python ]; then
+  if command -v uv >/dev/null; then uv venv -q .venv --python "$PY"; else "$PY" -m venv .venv; fi
+fi
+STAMP=".venv/.deps-$(cat pyproject.toml | shasum | cut -c1-10)${EXTRAS:+-dev}"
+if [ ! -f "$STAMP" ]; then
+  echo "▸ Instalando dependencias…"
+  if command -v uv >/dev/null; then uv pip install -q --python .venv/bin/python -e ".$EXTRAS"
+  else .venv/bin/python -m pip install -q -e ".$EXTRAS"; fi
+  [ -n "$EXTRAS" ] && .venv/bin/python -m playwright install chromium
+  touch "$STAMP"
+fi
+
+if [ "${1:-}" = "test" ]; then shift; exec .venv/bin/python -m pytest "$@"; fi
+exec .venv/bin/python -m couchflix_app

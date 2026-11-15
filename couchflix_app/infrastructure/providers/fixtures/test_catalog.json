@@ -1,0 +1,666 @@
+{
+ "_notice": "TEST DATA — fictional catalog used only by the 'fake' provider (tests, demos, screenshots). Never used in production.",
+ "items": [
+  {
+   "id": 1,
+   "type": "movie",
+   "title": "Horizonte Cuántico",
+   "original_title": "Horizonte Cuántico",
+   "year": 2024,
+   "genres": [
+    "scifi",
+    "adventure",
+    "drama"
+   ],
+   "rating": 8.3,
+   "popularity": 90,
+   "synopsis": "Una exploradora cruza un agujero de gusano para salvar a una Tierra que se apaga. (Contenido ficticio de pruebas.)",
+   "platforms": [
+    [
+     "Netflix",
+     "subscription"
+    ]
+   ],
+   "runtime": 148
+  },
+  {
+   "id": 2,
+   "type": "movie",
+   "title": "Eco de Neón",
+   "original_title": "Eco de Neón",
+   "year": 2023,
+   "genres": [
+    "scifi",
+    "thriller"
+   ],
+   "rating": 7.6,
+   "popularity": 70,
+   "synopsis": "En una ciudad lluviosa, un detective descubre que sus recuerdos no son suyos. (Contenido ficticio de pruebas.)",
+   "platforms": [
+    [
+     "Netflix",
+     "subscription"
+    ],
+    [
+     "Amazon Prime Video",
+     "rental"
+    ]
+   ],
+   "runtime": 112
+  },
+  {
+   "id": 3,
+   "type": "movie",
+   "title": "La Casa del Eco",
+   "original_title": "La Casa del Eco",
+   "year": 2022,
+   "genres": [
+    "horror",
+    "mystery"
+   ],
+   "rating": 7.1,
+   "popularity": 55,
+   "synopsis": "Una familia oye su propia voz respondiendo desde las paredes. (Contenido ficticio de pruebas.)",
+   "platforms": [
+    [
+     "Netflix",
+     "subscription"
+    ]
+   ],
+   "runtime": 98
+  },
+  {
+   "id": 4,
+   "type": "movie",
+   "title": "Noche sin Luna",
+   "original_title": "Noche sin Luna",
+   "year": 2024,
+   "genres": [
+    "horror",
+    "thriller"
+   ],
+   "rating": 7.4,
+   "popularity": 65,
+   "synopsis": "Seis amigos, una cabaña y una luna que nunca sale. (Contenido ficticio de pruebas.)",
+   "platforms": [
+    [
+     "Netflix",
+     "subscription"
+    ]
+   ],
+   "runtime": 104
+  },
+  {
+   "id": 5,
+   "type": "movie",
+   "title": "Sombras en el Faro",
+   "original_title": "Sombras en el Faro",
+   "year": 2021,
+   "genres": [
+    "horror"
+   ],
+   "rating": 6.5,
+   "popularity": 40,
+   "synopsis": "El nuevo farero descubre por qué nadie dura más de un invierno. (Contenido ficticio de pruebas.)",
+   "platforms": [
+    [
+     "Amazon Prime Video",
+     "subscription"
+    ]
+   ],
+   "runtime": 91
+  },
+  {
+   "id": 6,
+   "type": "movie",
+   "title": "Cartas de Otoño",
+   "original_title": "Cartas de Otoño",
+   "year": 2023,
+   "genres": [
+    "romance",
+    "drama"
+   ],
+   "rating": 7.9,
+   "popularity": 60,
+   "synopsis": "Dos desconocidos se enamoran escribiéndose cartas que nunca deberían haber llegado. (Contenido ficticio de pruebas.)",
+   "platforms": [
+    [
+     "Netflix",
+     "subscription"
+    ]
+   ],
+   "runtime": 119
+  },
+  {
+   "id": 7,
+   "type": "movie",
+   "title": "Mil Veranos Contigo",
+   "original_title": "Mil Veranos Contigo",
+   "year": 2022,
+   "genres": [
+    "romance",
+    "comedy"
+   ],
+   "rating": 7.0,
+   "popularity": 52,
+   "synopsis": "Una pareja repite el mismo verano durante mil días. (Contenido ficticio de pruebas.)",
+   "platforms": [
+    [
+     "Netflix",
+     "subscription"
+    ],
+    [
+     "Max",
+     "subscription"
+    ]
+   ],
+   "runtime": 101
+  },
+  {
+   "id": 8,
+   "type": "movie",
+   "title": "El Mapa de Cristal",
+   "original_title": "El Mapa de Cristal",
+   "year": 2024,
+   "genres": [
+    "adventure",
+    "family",
+    "fantasy"
+   ],
+   "rating": 7.8,
+   "popularity": 85,
+   "synopsis": "Tres hermanos siguen un mapa que solo se ve con luz de luna. (Contenido ficticio de pruebas.)",
+   "platforms": [
+    [
+     "Netflix",
+     "subscription"
+    ]
+   ],
+   "runtime": 115
+  },
+  {
+   "id": 9,
+   "type": "movie",
+   "title": "Rumbo a Isla Faro",
+   "original_title": "Rumbo a Isla Faro",
+   "year": 2020,
+   "genres": [
+    "adventure",
+    "family"
+   ],
+   "rating": 7.2,
+   "popularity": 48,
+   "synopsis": "Un grumete y un loro parlanchín buscan un tesoro imposible. (Contenido ficticio de pruebas.)",
+   "platforms": [
+    [
+     "Disney+",
+     "subscription"
+    ]
+   ],
+   "runtime": 96
+  },
+  {
+   "id": 10,
+   "type": "movie",
+   "title": "Pequeños Gigantes",
+   "original_title": "Pequeños Gigantes",
+   "year": 2023,
+   "genres": [
+    "animation",
+    "family",
+    "comedy"
+   ],
+   "rating": 7.7,
+   "popularity": 75,
+   "synopsis": "Una hormiga sueña con dirigir el hormiguero más grande del mundo. (Contenido ficticio de pruebas.)",
+   "platforms": [
+    [
+     "Netflix",
+     "subscription"
+    ],
+    [
+     "Disney+",
+     "subscription"
+    ]
+   ],
+   "runtime": 93
+  },
+  {
+   "id": 11,
+   "type": "movie",
+   "title": "La Última Función",
+   "original_title": "La Última Función",
+   "year": 2021,
+   "genres": [
+    "drama"
+   ],
+   "rating": 8.1,
+   "popularity": 58,
+   "synopsis": "El proyeccionista de un cine centenario decide poner una última película. (Contenido ficticio de pruebas.)",
+   "platforms": [
+    [
+     "Netflix",
+     "subscription"
+    ]
+   ],
+   "runtime": 127
+  },
+  {
+   "id": 12,
+   "type": "movie",
+   "title": "Hijos del Invierno",
+   "original_title": "Hijos del Invierno",
+   "year": 2019,
+   "genres": [
+    "drama",
+    "history"
+   ],
+   "rating": 8.4,
+   "popularity": 45,
+   "synopsis": "Una saga familiar sobrevive a tres inviernos de guerra. (Contenido ficticio de pruebas.)",
+   "platforms": [
+    [
+     "Max",
+     "subscription"
+    ]
+   ],
+   "runtime": 138
+  },
+  {
+   "id": 13,
+   "type": "movie",
+   "title": "Código Rojo Marte",
+   "original_title": "Código Rojo Marte",
+   "year": 2024,
+   "genres": [
+    "scifi",
+    "action"
+   ],
+   "rating": 7.3,
+   "popularity": 88,
+   "synopsis": "Una misión de rescate en Marte se convierte en una carrera contra el reloj. (Contenido ficticio de pruebas.)",
+   "platforms": [
+    [
+     "Netflix",
+     "subscription"
+    ]
+   ],
+   "runtime": 131
+  },
+  {
+   "id": 14,
+   "type": "movie",
+   "title": "Pulso Final",
+   "original_title": "Pulso Final",
+   "year": 2023,
+   "genres": [
+    "action",
+    "thriller"
+   ],
+   "rating": 6.9,
+   "popularity": 80,
+   "synopsis": "Un ex-piloto tiene 90 minutos para detener un apagón global. (Contenido ficticio de pruebas.)",
+   "platforms": [
+    [
+     "Netflix",
+     "subscription"
+    ],
+    [
+     "Amazon Prime Video",
+     "subscription"
+    ]
+   ],
+   "runtime": 109
+  },
+  {
+   "id": 15,
+   "type": "movie",
+   "title": "Mundo Paralelo",
+   "original_title": "Mundo Paralelo",
+   "year": 2022,
+   "genres": [
+    "scifi",
+    "romance"
+   ],
+   "rating": 7.5,
+   "popularity": 50,
+   "synopsis": "Dos versiones del mismo hombre se enamoran de la misma mujer. (Contenido ficticio de pruebas.)",
+   "platforms": [
+    [
+     "Amazon Prime Video",
+     "subscription"
+    ]
+   ],
+   "runtime": 117
+  },
+  {
+   "id": 16,
+   "type": "movie",
+   "title": "La Isla de las Mareas",
+   "original_title": "La Isla de las Mareas",
+   "year": 2024,
+   "genres": [
+    "adventure",
+    "mystery"
+   ],
+   "rating": 7.7,
+   "popularity": 72,
+   "synopsis": "Una isla aparece solo cuando baja la marea más grande del siglo. (Contenido ficticio de pruebas.)",
+   "platforms": [
+    [
+     "Netflix",
+     "subscription"
+    ]
+   ],
+   "runtime": 122
+  },
+  {
+   "id": 17,
+   "type": "movie",
+   "title": "Dulces Pesadillas",
+   "original_title": "Dulces Pesadillas",
+   "year": 2020,
+   "genres": [
+    "horror",
+    "comedy"
+   ],
+   "rating": 6.6,
+   "popularity": 38,
+   "synopsis": "Una pastelería maldita hornea los peores miedos de sus clientes. (Contenido ficticio de pruebas.)",
+   "platforms": [
+    [
+     "Netflix",
+     "subscription"
+    ]
+   ],
+   "runtime": 95
+  },
+  {
+   "id": 18,
+   "type": "movie",
+   "title": "Maratón de Domingo",
+   "original_title": "Maratón de Domingo",
+   "year": 2024,
+   "genres": [
+    "comedy",
+    "family"
+   ],
+   "rating": 7.0,
+   "popularity": 66,
+   "synopsis": "Una familia caótica intenta ver una película entera sin interrupciones. (Contenido ficticio de pruebas.)",
+   "platforms": [
+    [
+     "Netflix",
+     "subscription"
+    ]
+   ],
+   "runtime": 99
+  },
+  {
+   "id": 19,
+   "type": "movie",
+   "title": "Joya Escondida",
+   "original_title": "Joya Escondida",
+   "year": 2018,
+   "genres": [
+    "drama",
+    "mystery"
+   ],
+   "rating": 8.2,
+   "popularity": 12,
+   "synopsis": "Un tasador de antigüedades encuentra una carta que cambia su vida. (Contenido ficticio de pruebas.)",
+   "platforms": [
+    [
+     "Netflix",
+     "subscription"
+    ]
+   ],
+   "runtime": 104
+  },
+  {
+   "id": 20,
+   "type": "movie",
+   "title": "Bosque de Cristal",
+   "original_title": "Bosque de Cristal",
+   "year": 2017,
+   "genres": [
+    "fantasy",
+    "adventure"
+   ],
+   "rating": 8.0,
+   "popularity": 15,
+   "synopsis": "Una niña descubre que el bosque de su abuela respira. (Contenido ficticio de pruebas.)",
+   "platforms": [
+    [
+     "Netflix",
+     "subscription"
+    ]
+   ],
+   "runtime": 110
+  },
+  {
+   "id": 21,
+   "type": "tv",
+   "title": "Los Años Luz",
+   "original_title": "Los Años Luz",
+   "year": 2024,
+   "genres": [
+    "scifi",
+    "drama"
+   ],
+   "rating": 8.5,
+   "popularity": 95,
+   "synopsis": "Una tripulación envejece a bordo de una nave que nunca llega. (Contenido ficticio de pruebas.)",
+   "platforms": [
+    [
+     "Netflix",
+     "subscription"
+    ]
+   ],
+   "seasons": 3,
+   "runtime": 45
+  },
+  {
+   "id": 22,
+   "type": "tv",
+   "title": "Marea Alta",
+   "original_title": "Marea Alta",
+   "year": 2023,
+   "genres": [
+    "drama",
+    "mystery"
+   ],
+   "rating": 8.0,
+   "popularity": 70,
+   "synopsis": "Un pueblo costero guarda un secreto bajo cada ola. (Contenido ficticio de pruebas.)",
+   "platforms": [
+    [
+     "Netflix",
+     "subscription"
+    ]
+   ],
+   "seasons": 2,
+   "runtime": 45
+  },
+  {
+   "id": 23,
+   "type": "tv",
+   "title": "Casa Blanca Rota",
+   "original_title": "Casa Blanca Rota",
+   "year": 2022,
+   "genres": [
+    "horror",
+    "drama"
+   ],
+   "rating": 7.5,
+   "popularity": 60,
+   "synopsis": "Una mansión heredada exige una cena a medianoche. (Contenido ficticio de pruebas.)",
+   "platforms": [
+    [
+     "Netflix",
+     "subscription"
+    ]
+   ],
+   "seasons": 2,
+   "runtime": 45
+  },
+  {
+   "id": 24,
+   "type": "tv",
+   "title": "Corazones de Barrio",
+   "original_title": "Corazones de Barrio",
+   "year": 2024,
+   "genres": [
+    "romance",
+    "comedy"
+   ],
+   "rating": 7.2,
+   "popularity": 58,
+   "synopsis": "Cinco vecinos, una azotea y demasiados secretos. (Contenido ficticio de pruebas.)",
+   "platforms": [
+    [
+     "Netflix",
+     "subscription"
+    ]
+   ],
+   "seasons": 1,
+   "runtime": 45
+  },
+  {
+   "id": 25,
+   "type": "tv",
+   "title": "Expedición Sigma",
+   "original_title": "Expedición Sigma",
+   "year": 2023,
+   "genres": [
+    "adventure",
+    "scifi"
+   ],
+   "rating": 7.9,
+   "popularity": 82,
+   "synopsis": "Un equipo científico explora una selva que se reescribe cada noche. (Contenido ficticio de pruebas.)",
+   "platforms": [
+    [
+     "Max",
+     "subscription"
+    ]
+   ],
+   "seasons": 2,
+   "runtime": 45
+  },
+  {
+   "id": 26,
+   "type": "tv",
+   "title": "Pequeños Detectives",
+   "original_title": "Pequeños Detectives",
+   "year": 2022,
+   "genres": [
+    "family",
+    "mystery"
+   ],
+   "rating": 7.6,
+   "popularity": 64,
+   "synopsis": "Cuatro niños resuelven los casos que los adultos ignoran. (Contenido ficticio de pruebas.)",
+   "platforms": [
+    [
+     "Disney+",
+     "subscription"
+    ],
+    [
+     "Netflix",
+     "subscription"
+    ]
+   ],
+   "seasons": 4,
+   "runtime": 45
+  },
+  {
+   "id": 27,
+   "type": "tv",
+   "title": "Última Frontera",
+   "original_title": "Última Frontera",
+   "year": 2021,
+   "genres": [
+    "western",
+    "drama"
+   ],
+   "rating": 8.3,
+   "popularity": 50,
+   "synopsis": "El último sheriff de un pueblo que ya no está en el mapa. (Contenido ficticio de pruebas.)",
+   "platforms": [
+    [
+     "Amazon Prime Video",
+     "subscription"
+    ]
+   ],
+   "seasons": 5,
+   "runtime": 45
+  },
+  {
+   "id": 28,
+   "type": "tv",
+   "title": "Mente Abierta",
+   "original_title": "Mente Abierta",
+   "year": 2024,
+   "genres": [
+    "thriller",
+    "crime"
+   ],
+   "rating": 7.8,
+   "popularity": 77,
+   "synopsis": "Una psicóloga infiltrada en una banda que lee los pensamientos. (Contenido ficticio de pruebas.)",
+   "platforms": [
+    [
+     "Netflix",
+     "subscription"
+    ]
+   ],
+   "seasons": 1,
+   "runtime": 45
+  },
+  {
+   "id": 29,
+   "type": "tv",
+   "title": "Cocina Cósmica",
+   "original_title": "Cocina Cósmica",
+   "year": 2023,
+   "genres": [
+    "comedy",
+    "scifi"
+   ],
+   "rating": 7.1,
+   "popularity": 44,
+   "synopsis": "Un chef intergaláctico abre un restaurante en la Tierra. (Contenido ficticio de pruebas.)",
+   "platforms": [
+    [
+     "Apple TV+",
+     "subscription"
+    ]
+   ],
+   "seasons": 2,
+   "runtime": 45
+  },
+  {
+   "id": 30,
+   "type": "tv",
+   "title": "El Gran Truco",
+   "original_title": "El Gran Truco",
+   "year": 2022,
+   "genres": [
+    "crime",
+    "thriller"
+   ],
+   "rating": 8.1,
+   "popularity": 68,
+   "synopsis": "Un mago retirado planea el último atraco. (Contenido ficticio de pruebas.)",
+   "platforms": [
+    [
+     "Netflix",
+     "subscription"
+    ]
+   ],
+   "seasons": 3,
+   "runtime": 45
+  }
+ ]
+}

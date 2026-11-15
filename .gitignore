@@ -1,0 +1,24 @@
+# secrets
+.env
+
+# local databases
+data/
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+
+# environments, caches and build artifacts / binaries
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+test-results/
+*.egg-info/
+build/
+dist/
+*.so
+*.exe
+*.bin
+.DS_Store

@@ -1,0 +1,25 @@
+[project]
+name = "couchflix"
+version = "0.1.0"
+description = "COUCHFLIX — Less scrolling. More chilling."
+requires-python = ">=3.11"
+dependencies = ["fastapi>=0.110", "uvicorn>=0.29", "httpx>=0.27"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "pytest-playwright>=0.5"]
+build = ["pyinstaller>=6"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["couchflix_app*"]
+
+[tool.setuptools.package-data]
+couchflix_app = ["infrastructure/migrations/*.sql", "infrastructure/providers/fixtures/*.json", "web/static/**/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-m 'not screenshots'"
+markers = ["screenshots: regenerate docs/screenshots (opt-in: ./couchflix test -m screenshots)"]

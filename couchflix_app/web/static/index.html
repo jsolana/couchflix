@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>COUCHFLIX — Less scrolling. More chilling.</title>
+  <meta name="theme-color" content="#0b0d15">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236ee7d8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3'/%3E%3Cpath d='M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H6v-2a2 2 0 0 0-4 0Z'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <div class="app" id="app">
+    <nav class="sidebar" aria-label="Principal">
+      <div class="brand"><span id="logo"></span><span class="word label">COUCHFLIX</span></div>
+      <a class="nav-item" href="#/suggestions" data-route="suggestions" data-tip="Sugerencias"><span class="ic"></span><span class="label">Sugerencias</span></a>
+      <a class="nav-item" href="#/search" data-route="search" data-tip="Buscar"><span class="ic"></span><span class="label">Buscar</span></a>
+      <a class="nav-item" href="#/profile" data-route="profile" data-tip="Perfil"><span class="ic"></span><span class="label">Perfil</span></a>
+      <div class="spacer"></div>
+      <button class="nav-item" id="settings-btn" data-tip="Configuración" aria-label="Configuración"><span class="ic"></span><span class="label">Ajustes</span></button>
+      <button class="nav-item" id="collapse-btn" data-tip="Expandir / contraer menú" aria-label="Expandir o contraer el menú" aria-expanded="true"><span class="ic"></span><span class="label">Contraer</span></button>
+    </nav>
+    <main>
+      <section class="view" id="view-suggestions" aria-label="Sugerencias"></section>
+      <section class="view" id="view-search" aria-label="Buscar"></section>
+      <section class="view" id="view-profile" aria-label="Perfil"></section>
+    </main>
+  </div>
+  <div id="overlay"></div>
+  <div id="toasts" role="status" aria-live="polite"></div>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
