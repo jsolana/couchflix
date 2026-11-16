@@ -5,7 +5,7 @@ import hashlib
 import os
 from pathlib import Path
 
-from fastapi import Body, FastAPI, HTTPException
+from fastapi import Body, Depends, FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -22,6 +22,11 @@ class InteractionIn(BaseModel):
     watched: bool | None = None
     rating: str | None = None   # like | love | dislike | null (clears)
     comment: str | None = None
+
+
+class ProfileIn(BaseModel):
+    name: str
+    avatar: str
 
 
 class SearchIn(BaseModel):
@@ -46,9 +51,44 @@ def build_providers(app_settings, names: list[str]) -> dict:
 def create_app(db_path: str | None = None, provider_names: list[str] | None = None) -> FastAPI:
     db = Db(db_path or os.environ.get("COUCHFLIX_DB", "data/couchflix.db"))
     names = provider_names or [n.strip() for n in os.environ.get("COUCHFLIX_PROVIDERS", "tmdb").split(",") if n.strip()]
-    from ..infrastructure.repositories import Settings
+    from ..infrastructure.repositories import AVATARS, MAX_PROFILES, ProfileError, Settings, current_user
     core = Couchflix(db, build_providers(Settings(db), names))
-    app = FastAPI(title="COUCHFLIX", docs_url=None, redoc_url=None)
+
+    async def active_profile(request: Request):
+        """Every /api call except the profile picker's own runs as the profile named in X-Profile (async: the
+        ContextVar must be set in the request task so the threadpool-run endpoint inherits it)."""
+        path = request.url.path
+        if not path.startswith("/api/") or path.startswith("/api/profiles"):
+            return
+        header = request.headers.get("x-profile", "")
+        if not header.isdigit() or not core.profiles.get(int(header)):
+            raise HTTPException(401, "Selecciona un perfil")
+        current_user.set(int(header))
+
+    app = FastAPI(title="COUCHFLIX", docs_url=None, redoc_url=None, dependencies=[Depends(active_profile)])
+
+    def profile_call(fn, *args):
+        try:
+            return fn(*args)
+        except ProfileError as err:
+            raise HTTPException(409 if "Máximo" in str(err) or "último" in str(err) else 422, str(err))
+
+    @app.get("/api/profiles")
+    def list_profiles():
+        return {"profiles": core.profiles.all(), "max": MAX_PROFILES, "avatars": list(AVATARS)}
+
+    @app.post("/api/profiles")
+    def create_profile(body: ProfileIn):
+        return profile_call(core.profiles.create, body.name, body.avatar)
+
+    @app.put("/api/profiles/{profile_id}")
+    def update_profile(profile_id: int, body: ProfileIn):
+        return found(profile_call(core.profiles.update, profile_id, body.name, body.avatar))
+
+    @app.delete("/api/profiles/{profile_id}")
+    def delete_profile(profile_id: int):
+        found(profile_call(core.profiles.delete, profile_id) or None)
+        return {"deleted": profile_id}
 
     def found(value):
         if value is None:

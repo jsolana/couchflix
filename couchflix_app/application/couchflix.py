@@ -2,13 +2,15 @@
 from __future__ import annotations
 
 import threading
+from collections import defaultdict
 from datetime import datetime, timezone
 
 from ..domain.criteria import Criteria, refine
 from ..domain.models import GENRES, STREAM_MODES, Content, Pick, now_iso
 from ..infrastructure.db import Db
 from ..infrastructure.providers.base import ICatalogProvider
-from ..infrastructure.repositories import (ContentRepo, PlatformRepo, SessionRepo, Settings, UserRepo, USER_ID)
+from ..infrastructure.repositories import (ContentRepo, PlatformRepo, ProfileRepo, SessionRepo, Settings, UserRepo,
+                                               current_user)
 from ..services.agent.interpreter import interpret
 from ..services.agent.llm import build_llm
 from ..services.catalog_service import CatalogService
@@ -23,10 +25,11 @@ class Couchflix:
         self.db, self.settings = db, Settings(db)
         self.contents, self.platforms = ContentRepo(db), PlatformRepo(db)
         self.users, self.sessions = UserRepo(db), SessionRepo(db)
+        self.profiles = ProfileRepo(db)
         self.catalog = CatalogService(self.contents, self.platforms, self.settings, providers)
         self.profile = ProfileService(self.users)
         self.recommender = Recommender(self.catalog, self.users, self.platforms, self.profile, self.settings)
-        self._locks = {"personal": threading.Lock(), "discovery": threading.Lock()}
+        self._locks = defaultdict(threading.Lock)  # one per (kind, profile)
 
     # ------------------------------------------------------------- serialization
     def card(self, c: Content, state: dict, pick: Pick | None = None) -> dict:
@@ -70,7 +73,7 @@ class Couchflix:
         if setup := self._setup():
             if not self.sessions.latest(kind):
                 return setup
-        with self._locks[kind]:
+        with self._locks[kind, current_user.get()]:
             current = self.sessions.latest(kind)
             fresh = current and current["expires_at"] > datetime.now(timezone.utc).isoformat()
             if current and fresh and not refresh:
@@ -188,4 +191,4 @@ class Couchflix:
             for row in rows:
                 if row.get("content_id") in contents:
                     row["title"] = contents[row["content_id"]]
-        return {"exported_at": now_iso(), "user_id": USER_ID, **data}
+        return {"exported_at": now_iso(), "user_id": current_user.get(), **data}

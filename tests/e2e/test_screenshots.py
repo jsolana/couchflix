@@ -72,3 +72,19 @@ def test_screenshots(page, app, lived_in):
     expect(page.locator("[data-testid=search-results] .card:not(.sk)").first).to_be_visible(timeout=15000)
     page.wait_for_timeout(1500)
     shot("agent-results")
+
+    # 8. session profiles: picker, manage mode and the create/edit panel (a small family, built-in avatars)
+    for name, avatar in [("Lucía", "a7"), ("Marcos", "a2"), ("Peque", "a9")]:
+        lived_in.api("POST", "/api/profiles", json={"name": name, "avatar": avatar})
+    lived_in.api("PUT", "/api/profiles/1", json={"name": "Javi", "avatar": "a10"})
+    page.evaluate("sessionStorage.clear()")          # forget the preselected profile
+    page.goto(lived_in.url + "/?picker")
+    expect(page.locator(".pf-card:not(.add)")).to_have_count(4)
+    page.wait_for_timeout(900)
+    shot("profile-picker")
+    page.get_by_test_id("manage-profiles").click()
+    page.wait_for_timeout(300)
+    page.get_by_test_id("profile-3").click()
+    expect(page.get_by_test_id("profile-editor")).to_be_visible()
+    page.wait_for_timeout(700)
+    shot("profile-manage")

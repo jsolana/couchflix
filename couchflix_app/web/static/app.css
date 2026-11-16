@@ -272,6 +272,35 @@ a.event:hover { background: rgba(255, 255, 255, .05); }
 .field-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
 .panel .top { display: flex; justify-content: space-between; align-items: center; }
 
+/* ---------- session profiles (Netflix-style picker + avatars) */
+[hidden] { display: none !important; }
+.av { position: relative; display: block; width: 100%; aspect-ratio: 1; border-radius: 22%; overflow: hidden; background: var(--surface-2); }
+.av svg, .av img { width: 100%; height: 100%; display: block; object-fit: cover; }
+.av.sm { width: 28px; height: 28px; border-radius: 9px; flex: none; }
+.av.lg { width: 84px; flex: none; }
+.nav-item .av.sm { margin: -3px; }
+.picker { position: fixed; inset: 0; z-index: 40; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 34px; padding: 24px; overflow-y: auto; background: var(--bg); animation: fade .4s; }
+.picker-brand { position: absolute; top: 26px; left: 30px; display: flex; align-items: center; gap: 12px; color: var(--accent); font-weight: 800; letter-spacing: .22em; font-size: 14px; }
+.picker h1 { text-align: center; }
+.picker-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: clamp(16px, 3vw, 34px); max-width: 980px; }
+.pf-card { display: grid; justify-items: center; gap: 12px; width: clamp(104px, 15vw, 150px); color: var(--muted); transition: color .2s, transform .25s var(--ease); }
+.pf-card .av { transition: box-shadow .25s, transform .25s var(--ease); }
+.pf-card:hover, .pf-card:focus-visible { color: var(--text); transform: translateY(-3px); }
+.pf-card:hover .av, .pf-card:focus-visible .av { box-shadow: var(--glow); }
+.pf-card.add .av { display: grid; place-items: center; border: 2px dashed rgba(255, 255, 255, .22); background: transparent; color: var(--muted); }
+.pf-card.add .av svg { width: 38%; height: 38%; }
+.pf-name { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 16px; }
+.pf-edit { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(5, 6, 11, .55); color: #fff; }
+.pf-edit svg { width: 34%; height: 34%; }
+.pe-head { display: flex; align-items: flex-end; gap: 16px; }
+.av-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(56px, 1fr)); gap: 10px; }
+.av-opt { border-radius: 24%; padding: 3px; border: 2px solid transparent; transition: border-color .2s, transform .15s; }
+.av-opt:hover { transform: scale(1.06); }
+.av-opt[aria-pressed="true"] { border-color: var(--accent); box-shadow: var(--glow); }
+.btn.danger { color: var(--bad); }
+.btn.danger:hover { background: rgba(255, 122, 144, .14); }
+.pe-confirm { display: grid; gap: 14px; padding: 16px; border-radius: 14px; border: 1px solid rgba(255, 122, 144, .35); background: rgba(255, 122, 144, .06); }
+
 /* ---------- responsive */
 @media (max-width: 860px) {
   .profile-grid { grid-template-columns: 1fr; }

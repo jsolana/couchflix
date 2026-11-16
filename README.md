@@ -11,6 +11,7 @@ Intelligent entertainment discovery: an agent that knows your taste, your stream
 
 ## Features
 
+- **Perfiles de sesión (family profiles)**: a Netflix-style "¿Quién está viendo?" screen is always the entry point; each family member has their own name, avatar and fully private data (taste profile, history, searches, suggestions). See [Session profiles](#session-profiles-family).
 - **Sugerencias (Suggestions)**: a personalized carousel ("Para ti") and, kept separate, *Random Couch Sessions* (seasonal picks, hidden gems, outside your comfort zone, your last search).
 - **Buscar (Search)**: ask the agent anything in natural language and refine with one tap ("more recent", "other options"…).
 - **Perfil (Profile)**: a 6-dimension audiovisual radar that builds up from the centre, with top genres, evolution and an activity history.
@@ -30,6 +31,10 @@ Intelligent entertainment discovery: an agent that knows your taste, your stream
 | Search | Agent results |
 |---|---|
 | ![Search](docs/screenshots/search.png) | ![Results](docs/screenshots/agent-results.png) |
+
+| Who's watching? | Manage a profile |
+|---|---|
+| ![Profile picker](docs/screenshots/profile-picker.png) | ![Edit profile](docs/screenshots/profile-manage.png) |
 
 > Screenshots are generated with Playwright against a **fictional test catalog** (fixtures) so they can be produced offline and without API keys. In real use you get posters and data from TMDB.
 
@@ -66,10 +71,14 @@ Through environment variables, a `.env` file in the working directory (see `.env
 | `TMDB_API_KEY` | TMDB key (v3) or token (v4). Without it the app still starts and asks you to configure a provider. |
 | `COUCHFLIX_PROVIDERS` | Registered providers, `tmdb` by default. |
 | `COUCHFLIX_DB` | SQLite path. Defaults to **`data/couchflix.db`**. |
-| `COUCHFLIX_PORT` / `COUCHFLIX_HOST` | `8765` / `127.0.0.1`. |
+| `COUCHFLIX_PORT` / `COUCHFLIX_HOST` | `8765` / `0.0.0.0` (accesible desde la red local; usa `127.0.0.1` para restringir a este equipo). |
 | `COUCHFLIX_LLM`, `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `OPENAI_BASE_URL` | Optional LLM agent (see [Agent](#agent)). |
 
 Initial values: country **Spain**, platform **Netflix** (only until you configure your own), empty history, and a neutral profile with every dimension at **50**. If you turn off all platforms, Netflix is not assumed: you are told, and searches run without a subscription filter. Settings also let you change the country, platforms, the Random Couch Sessions refresh interval, active providers, credentials, the LLM, recalculate the profile and export your data.
+
+### Session profiles (family)
+
+The first screen is always a Netflix-style **"who's watching?"** picker. Each profile (name + one of 12 built-in avatars, or a picture from your device) has its own private data space: taste profile, history, ratings, searches and suggestions are never shared between profiles, and deleting a profile erases all of it. Up to 8 profiles; the pre-existing one is named **Javi**. Settings, platforms and the catalog cache are global. Use **Administrar perfiles** on the picker to rename a profile, change its avatar (or upload your own image) or delete it, and *Cambiar perfil* in the menu to go back to the picker. There is no PIN: anyone on your network can pick any profile.
 
 ### Profile learning
 

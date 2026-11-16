@@ -3,12 +3,23 @@ from __future__ import annotations
 
 import json
 import os
+import re
+from contextvars import ContextVar
 from datetime import datetime, timedelta, timezone
 
 from ..domain.models import Availability, Content, norm_title, now_iso, platform_key
 from .db import Db
 
-USER_ID = 1
+# Active session profile. The web layer sets it per request (X-Profile header); 1 = the default profile (tests, CLI).
+current_user: ContextVar[int] = ContextVar("current_user", default=1)
+MAX_PROFILES = 8
+AVATARS = tuple(f"a{i}" for i in range(1, 13))
+IMAGE_AVATAR = re.compile(r"^data:image/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$")
+MAX_AVATAR_BYTES = 150_000
+
+
+class ProfileError(ValueError):
+    """Invalid profile data (the web layer maps it to HTTP 422/409)."""
 
 
 class Settings:
@@ -41,7 +52,7 @@ class Settings:
         self.db.run("INSERT INTO settings VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
                     (key, json.dumps(value)))
         if key == "country":
-            self.db.run("UPDATE users SET country=? WHERE id=?", (value, USER_ID))
+            self.db.run("UPDATE users SET country=?", (value,))  # country is global
 
 
 class PlatformRepo:
@@ -196,10 +207,14 @@ class ContentRepo:
 
 
 class UserRepo:
-    """Interactions, activity, searches and profile snapshots of the (single) local user."""
+    """Interactions, activity, searches and profile snapshots of the ACTIVE session profile (never of another one)."""
 
     def __init__(self, db: Db):
         self.db = db
+
+    @property
+    def uid(self) -> int:
+        return current_user.get()
 
     def state(self, content_id: int) -> dict:
         return self.states([content_id])[content_id]
@@ -209,7 +224,7 @@ class UserRepo:
         if ids:
             marks = ",".join("?" * len(ids))
             for r in self.db.all(f"SELECT * FROM interactions WHERE user_id=? AND content_id IN ({marks})",
-                                 (USER_ID, *ids)):
+                                 (self.uid, *ids)):
                 out[r["content_id"]] = {"watched": bool(r["watched"]), "rating": r["rating"], "comment": r["comment"]}
         return out
 
@@ -221,7 +236,7 @@ class UserRepo:
             "INSERT INTO interactions VALUES (?,?,?,?,?,?,?) ON CONFLICT(user_id, content_id) DO UPDATE SET "
             "watched=excluded.watched, rating=excluded.rating, comment=excluded.comment, "
             "origin=excluded.origin, updated_at=excluded.updated_at",
-            (USER_ID, content_id, int(new["watched"]), new["rating"], new["comment"], origin, now_iso()))
+            (self.uid, content_id, int(new["watched"]), new["rating"], new["comment"], origin, now_iso()))
         if "watched" in fields and fields["watched"] != cur["watched"]:
             self.log("watched" if fields["watched"] else "unwatched", content_id)
         if "rating" in fields and fields["rating"] != cur["rating"]:
@@ -232,26 +247,26 @@ class UserRepo:
 
     def seen_ids(self) -> set[int]:
         return {r["content_id"] for r in self.db.all(
-            "SELECT content_id FROM interactions WHERE user_id=? AND (watched=1 OR rating IS NOT NULL)", (USER_ID,))}
+            "SELECT content_id FROM interactions WHERE user_id=? AND (watched=1 OR rating IS NOT NULL)", (self.uid,))}
 
     def rated(self) -> list[tuple[list[str], str]]:
         return [(json.loads(r["genres"]), r["rating"]) for r in self.db.all(
             "SELECT c.genres, i.rating FROM interactions i JOIN contents c ON c.id=i.content_id "
-            "WHERE i.user_id=? AND i.rating IS NOT NULL", (USER_ID,))]
+            "WHERE i.user_id=? AND i.rating IS NOT NULL", (self.uid,))]
 
     def log(self, kind: str, content_id: int | None = None, detail: str | None = None) -> None:
         self.db.run("INSERT INTO activity (user_id,kind,content_id,detail,created_at) VALUES (?,?,?,?,?)",
-                    (USER_ID, kind, content_id, detail, now_iso()))
+                    (self.uid, kind, content_id, detail, now_iso()))
 
     def activity(self, limit: int = 100) -> list[dict]:
         return [dict(r) for r in self.db.all(
-            "SELECT * FROM activity WHERE user_id=? ORDER BY id DESC LIMIT ?", (USER_ID, limit))]
+            "SELECT * FROM activity WHERE user_id=? ORDER BY id DESC LIMIT ?", (self.uid, limit))]
 
     # searches
     def add_search(self, query: str, criteria: dict, results: list[dict], origin: str, refined: bool = False) -> int:
         """Only searches typed/chosen by the user reach this table (initial suggestions never do)."""
         sid = self.db.run("INSERT INTO searches (user_id,query,criteria,results,origin,created_at,refined) VALUES (?,?,?,?,?,?,?)",
-                          (USER_ID, query, json.dumps(criteria), json.dumps(results), origin, now_iso(), int(refined))).lastrowid
+                          (self.uid, query, json.dumps(criteria), json.dumps(results), origin, now_iso(), int(refined))).lastrowid
         self.log("search", None, query)
         return sid
 
@@ -259,27 +274,27 @@ class UserRepo:
         return row and {**dict(row), "criteria": json.loads(row["criteria"]), "results": json.loads(row["results"])}
 
     def last_search(self) -> dict | None:
-        return self._search(self.db.one("SELECT * FROM searches WHERE user_id=? ORDER BY id DESC LIMIT 1", (USER_ID,)))
+        return self._search(self.db.one("SELECT * FROM searches WHERE user_id=? ORDER BY id DESC LIMIT 1", (self.uid,)))
 
     def get_search(self, search_id: int) -> dict | None:
-        return self._search(self.db.one("SELECT * FROM searches WHERE id=?", (search_id,)))
+        return self._search(self.db.one("SELECT * FROM searches WHERE id=? AND user_id=?", (search_id, self.uid)))
 
     def searched_genres(self) -> list[list[str]]:
         return [json.loads(r["criteria"]).get("genres", []) for r in self.db.all(
-            "SELECT criteria FROM searches WHERE user_id=? AND refined=0", (USER_ID,))]
+            "SELECT criteria FROM searches WHERE user_id=? AND refined=0", (self.uid,))]
 
     # profile snapshots (evolution)
     def snapshots(self, limit: int = 12) -> list[dict]:
-        rows = self.db.all("SELECT * FROM profile_snapshots WHERE user_id=? ORDER BY id DESC LIMIT ?", (USER_ID, limit))
+        rows = self.db.all("SELECT * FROM profile_snapshots WHERE user_id=? ORDER BY id DESC LIMIT ?", (self.uid, limit))
         return [{"dims": json.loads(r["dims"]), "computed_at": r["computed_at"]} for r in reversed(rows)]
 
     def add_snapshot(self, dims: dict) -> None:
         self.db.run("INSERT INTO profile_snapshots (user_id,dims,computed_at) VALUES (?,?,?)",
-                    (USER_ID, json.dumps(dims), now_iso()))
+                    (self.uid, json.dumps(dims), now_iso()))
 
     def export(self) -> dict:
         tables = ("interactions", "activity", "searches", "profile_snapshots")
-        return {t: [dict(r) for r in self.db.all(f"SELECT * FROM {t} WHERE user_id=?", (USER_ID,))] for t in tables}
+        return {t: [dict(r) for r in self.db.all(f"SELECT * FROM {t} WHERE user_id=?", (self.uid,))] for t in tables}
 
 
 class SessionRepo:
@@ -289,14 +304,72 @@ class SessionRepo:
         self.db = db
 
     def latest(self, kind: str) -> dict | None:
-        row = self.db.one("SELECT * FROM sessions WHERE kind=? ORDER BY id DESC LIMIT 1", (kind,))
+        row = self.db.one("SELECT * FROM sessions WHERE kind=? AND user_id=? ORDER BY id DESC LIMIT 1",
+                          (kind, current_user.get()))
         return row and {**dict(row), "results": json.loads(row["results"])}
 
     def save(self, kind: str, results: dict, ttl_hours: float, criteria: dict | None = None) -> None:
         now = datetime.now(timezone.utc)
-        self.db.run("INSERT INTO sessions (kind,criteria,results,created_at,expires_at) VALUES (?,?,?,?,?)",
+        self.db.run("INSERT INTO sessions (kind,criteria,results,created_at,expires_at,user_id) VALUES (?,?,?,?,?,?)",
                     (kind, json.dumps(criteria or {}), json.dumps(results),
-                     now.isoformat(timespec="seconds"), (now + timedelta(hours=ttl_hours)).isoformat(timespec="seconds")))
+                     now.isoformat(timespec="seconds"), (now + timedelta(hours=ttl_hours)).isoformat(timespec="seconds"),
+                     current_user.get()))
 
     def expire_all(self) -> None:
         self.db.run("UPDATE sessions SET expires_at=?", ("1970-01-01T00:00:00+00:00",))
+
+
+class ProfileRepo:
+    """Session profiles (family members): name + avatar. Each owns a private data space keyed by users.id."""
+    TABLES = ("interactions", "activity", "searches", "profile_snapshots", "sessions")
+
+    def __init__(self, db: Db):
+        self.db = db
+
+    @staticmethod
+    def _clean(name: str, avatar: str) -> tuple[str, str]:
+        name = " ".join((name or "").split())
+        if not 1 <= len(name) <= 24:
+            raise ProfileError("El nombre debe tener entre 1 y 24 caracteres")
+        if avatar not in AVATARS and not (len(avatar or "") <= MAX_AVATAR_BYTES and IMAGE_AVATAR.match(avatar or "")):
+            raise ProfileError("Avatar no válido")
+        return name, avatar
+
+    @staticmethod
+    def _view(row) -> dict:
+        return {"id": row["id"], "name": row["alias"], "avatar": row["avatar"] or AVATARS[0]}
+
+    def all(self) -> list[dict]:
+        return [self._view(r) for r in self.db.all("SELECT id, alias, avatar FROM users ORDER BY id")]
+
+    def get(self, profile_id: int) -> dict | None:
+        row = self.db.one("SELECT id, alias, avatar FROM users WHERE id=?", (profile_id,))
+        return row and self._view(row)
+
+    def create(self, name: str, avatar: str) -> dict:
+        name, avatar = self._clean(name, avatar)
+        with self.db.lock:
+            if self.db.one("SELECT COUNT(*) n FROM users")["n"] >= MAX_PROFILES:
+                raise ProfileError(f"Máximo {MAX_PROFILES} perfiles")
+            country = Settings(self.db).get("country")
+            pid = self.db.run("INSERT INTO users (alias, avatar, country, created_at) VALUES (?,?,?,?)",
+                              (name, avatar, country, now_iso())).lastrowid
+        return self.get(pid)
+
+    def update(self, profile_id: int, name: str, avatar: str) -> dict | None:
+        name, avatar = self._clean(name, avatar)
+        self.db.run("UPDATE users SET alias=?, avatar=? WHERE id=?", (name, avatar, profile_id))
+        return self.get(profile_id)
+
+    def delete(self, profile_id: int) -> bool:
+        """Removes the profile and everything it owns (history, searches, taste profile, cached suggestions)."""
+        with self.db.lock:
+            if not self.get(profile_id):
+                return False
+            if self.db.one("SELECT COUNT(*) n FROM users")["n"] <= 1:
+                raise ProfileError("No se puede eliminar el último perfil")
+            for table in self.TABLES:
+                self.db.conn.execute(f"DELETE FROM {table} WHERE user_id=?", (profile_id,))
+            self.db.conn.execute("DELETE FROM users WHERE id=?", (profile_id,))
+            self.db.conn.commit()
+        return True

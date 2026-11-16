@@ -400,3 +400,59 @@ def test_export_contains_user_history(page, app):
     seed_ratings(app, 2)
     data = app.api("GET", "/api/export")
     assert len(data["interactions"]) == 2 and data["activity"]
+
+
+# session profiles ----------------------------------------------------------------------------------------------
+def picker(page, app):
+    page.goto(app.url + "/?picker")
+    expect(page.get_by_test_id("picker")).to_be_visible()
+
+
+def test_first_screen_is_the_profile_picker_with_the_existing_profile(page, app):
+    picker(page, app)
+    expect(page.get_by_role("heading", name="¿Quién está viendo?")).to_be_visible()
+    expect(page.locator(".pf-card:not(.add) .pf-name")).to_have_text(["Javi"])
+    expect(page.locator("#app")).to_be_hidden()
+    page.get_by_test_id("profile-1").click()
+    expect(page.locator(REAL_CARD).first).to_be_visible(timeout=15000)
+    expect(page.get_by_test_id("switch-profile")).to_contain_text("Javi")
+
+
+def test_create_profile_with_avatar_isolated_data_and_switching(page, app):
+    seed_ratings(app, 2)                                      # the default profile has history
+    picker(page, app)
+    page.get_by_test_id("add-profile").click()
+    expect(page.locator("[data-testid^=avatar-]")).to_have_count(12)
+    page.get_by_test_id("profile-name").press_sequentially("Lucía")      # real key presses (fill() would hide a blocked keydown)
+    expect(page.get_by_test_id("profile-name")).to_have_value("Lucía")
+    page.get_by_test_id("avatar-a7").click()
+    page.get_by_test_id("save-profile").click()
+    page.get_by_test_id("profile-2").click()
+    expect(page.get_by_test_id("switch-profile")).to_contain_text("Lucía")
+    page.goto(app.url + "/?picker#/profile")
+    expect(page.get_by_test_id("picker")).to_be_hidden()      # a reload keeps the chosen profile
+    assert app.api("GET", "/api/activity", headers={"X-Profile": "2"}) == []
+    assert app.api("GET", "/api/activity")                    # Perfil (1) keeps its own
+    page.get_by_test_id("switch-profile").click()             # back to the picker
+    expect(page.get_by_test_id("picker")).to_be_visible()
+
+
+def test_edit_and_delete_profile_with_confirmation(page, app):
+    app.api("POST", "/api/profiles", json={"name": "Tmp", "avatar": "a2"})
+    picker(page, app)
+    page.get_by_test_id("manage-profiles").click()
+    page.get_by_test_id("profile-2").click()
+    page.get_by_test_id("profile-name").fill("Peque")
+    page.get_by_test_id("avatar-a9").click()
+    page.get_by_test_id("save-profile").click()
+    expect(page.get_by_test_id("profile-2")).to_contain_text("Peque")
+    page.get_by_test_id("profile-2").click()
+    page.get_by_test_id("delete-profile").click()
+    expect(page.get_by_text("No se puede deshacer")).to_be_visible()
+    page.get_by_test_id("confirm-delete").click()
+    expect(page.get_by_test_id("profile-2")).to_have_count(0)
+
+
+def test_api_rejects_unknown_profile(app):
+    import httpx
+    assert httpx.get(app.url + "/api/profile", headers={"X-Profile": "99"}).status_code == 401

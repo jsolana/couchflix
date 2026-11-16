@@ -6,7 +6,16 @@ import * as search from "./search.js";
 import * as profile from "./profile.js";
 import * as detail from "./detail.js";
 import { open as openSettingsPanel } from "./settings.js";
+import { ensureProfile, switchProfile } from "./profiles.js";
+import { avatarHTML } from "./avatars.js";
 const openSettings = () => openSettingsPanel(() => suggestions.reload());
+
+// The picker is always the first screen: nothing else loads until a session profile has been chosen.
+const me = await ensureProfile();
+$("#switch-btn .ic").innerHTML = `<span class="av sm">${avatarHTML(me.avatar)}</span>`;
+$("#switch-btn .label").textContent = me.name;
+$("#switch-btn").setAttribute("aria-label", `Cambiar perfil (ahora: ${me.name})`);
+$("#switch-btn").onclick = switchProfile;
 
 const VIEWS = { suggestions, search, profile };
 const ICONS = { suggestions: "compass", search: "search", profile: "user" };

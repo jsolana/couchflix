@@ -31,7 +31,7 @@ class App:
                                      stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         for _ in range(100):
             try:
-                if httpx.get(self.url + "/api/profile", timeout=1).status_code == 200:
+                if httpx.get(self.url + "/api/profiles", timeout=1).status_code == 200:
                     return self
             except httpx.HTTPError:
                 time.sleep(0.1)
@@ -53,12 +53,27 @@ class App:
 
     # helpers to drive/inspect the app from tests
     def api(self, method, path, **kw):
+        kw["headers"] = {"X-Profile": "1", **kw.get("headers", {})}   # default profile unless a test says otherwise
         r = httpx.request(method, self.url + path, timeout=15, **kw)
         r.raise_for_status()
         return r.json()
 
     def control(self, **kw):  # test-only knob of the fake provider (delay / fail)
         return self.api("POST", "/__test__/control", json=kw)
+
+
+@pytest.fixture(autouse=True)
+def _preselect_default_profile(monkeypatch):
+    """Every browser context starts with the default profile already chosen, so the existing scenarios skip the
+    picker. Opening the app with `?picker` opts out (the picker scenarios)."""
+    from playwright.sync_api import Browser
+    original = Browser.new_context
+
+    def new_context(self, *args, **kwargs):
+        context = original(self, *args, **kwargs)
+        context.add_init_script("if (!location.search.includes('picker')) sessionStorage.setItem('couchflix.profile', '1')")
+        return context
+    monkeypatch.setattr(Browser, "new_context", new_context)
 
 
 @pytest.fixture

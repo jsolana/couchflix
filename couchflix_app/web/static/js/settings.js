@@ -1,5 +1,5 @@
 // Discreet configuration panel (not a main menu section).
-import { api } from "./api.js";
+import { api, authHeaders } from "./api.js";
 import { icon } from "./icons.js";
 import { $, esc, h, toast } from "./ui.js";
 
@@ -28,7 +28,7 @@ export async function open(onChanged) {
         <div class="field"><label for="s-llm">Proveedor</label><select id="s-llm"><option value="none">Sin LLM (reglas)</option><option value="anthropic">Anthropic</option><option value="openai">OpenAI-compatible</option></select></div>
         <div class="field"><label for="s-model">Modelo</label><input id="s-model" placeholder="por defecto"></div>
         <div class="field"><label for="s-base">Base URL (OpenAI-compatible)</label><input id="s-base" placeholder="https://api.openai.com/v1"></div></div></div>
-      <div class="chips"><button class="btn" id="s-recalc">${icon("refresh")} Recalcular perfil</button><a class="btn" href="/api/export" download>${icon("download")} Exportar mis datos</a></div>
+      <div class="chips"><button class="btn" id="s-recalc">${icon("refresh")} Recalcular perfil</button><button class="btn" id="s-export">${icon("download")} Exportar mis datos</button></div>
     </section></div>`);
   overlay.replaceChildren(el);
   $(".backdrop", el).onclick = close; $("#s-close", el).onclick = close;
@@ -62,5 +62,10 @@ export async function open(onChanged) {
   $("#s-llm", el).onchange = (e) => put({ llm_provider: e.target.value }, "Agente actualizado");
   $("#s-model", el).onchange = (e) => put({ llm_model: e.target.value });
   $("#s-base", el).onchange = (e) => put({ llm_base_url: e.target.value });
+  $("#s-export", el).onclick = async () => {  // fetch (not a link) so the request carries the active profile
+    const res = await fetch("/api/export", { headers: authHeaders() });
+    const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(await res.blob()), download: "couchflix-export.json" });
+    a.click(); URL.revokeObjectURL(a.href);
+  };
   $("#s-recalc", el).onclick = async () => { await api.post("/api/profile/recalculate"); toast("Perfil recalculado"); };
 }
