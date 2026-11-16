@@ -62,6 +62,82 @@ make build      # produces dist/couchflix (PyInstaller); dist/ and build/ are gi
 
 Run it from a folder that contains your `.env`; the database is created in `./data`. The binary is built for the OS/architecture you build it on.
 
+## Running it at home 24/7 (Docker / Raspberry Pi)
+
+A laptop suspends or hibernates and the service stops with it. For an always-on home deployment, a **Raspberry Pi 4/5** (3–10 W, no sleep mode) or any small always-on machine running Docker is a good fit. The repo ships a `Dockerfile` (multi-arch: `linux/arm64` for the Pi, `linux/amd64`) and a `docker-compose.yml`.
+
+### What you need
+
+- Raspberry Pi 4 or 5 (2 GB RAM is enough), **Raspberry Pi OS 64-bit** (Lite is fine), wired Ethernet if possible.
+- A good microSD card, or better a USB SSD: SQLite writes often and cheap SD cards wear out.
+- A [TMDB](https://www.themoviedb.org/settings/api) API key.
+
+### 1. Prepare the Pi
+
+Flash Raspberry Pi OS with [Raspberry Pi Imager](https://www.raspberrypi.com/software/) and, in its advanced options, set a hostname (e.g. `couchflix`), your user, Wi-Fi if needed, and enable SSH. Then:
+
+```bash
+ssh <user>@couchflix.local
+sudo apt update && sudo apt full-upgrade -y
+curl -fsSL https://get.docker.com | sh
+sudo usermod -aG docker $USER      # log out and back in afterwards
+```
+
+Give the Pi a **fixed IP** (a DHCP reservation in your router is the easiest way) so the address never changes.
+
+### 2. Deploy
+
+```bash
+git clone <your-repo-url> couchflix && cd couchflix
+cp .env.example .env && nano .env     # set TMDB_API_KEY (and the LLM keys if you use them)
+docker compose up -d --build
+```
+
+The first build takes a couple of minutes on a Pi. When it finishes, open `http://<pi-ip>:8765` from any device on your Wi-Fi (or `http://couchflix.local:8765`).
+
+- `restart: unless-stopped` makes Docker start the app on boot and restart it if it crashes. Docker itself starts at boot (`sudo systemctl enable docker`, already the default).
+- The SQLite database lives in the named volume `couchflix-data` (mounted at `/data`), so it survives rebuilds and updates.
+- The image runs as a non-root user and has a healthcheck (`docker ps` shows `healthy`).
+
+### 3. Day-to-day
+
+```bash
+docker compose logs -f              # follow logs
+docker compose restart              # restart
+docker compose down                 # stop (data is kept)
+git pull && docker compose up -d --build     # update to a new version
+```
+
+**Backup** the database (the volume is called `<folder>_couchflix-data`, normally `couchflix_couchflix-data`):
+
+```bash
+docker run --rm -v couchflix_couchflix-data:/data -v "$PWD":/backup alpine \
+  tar czf /backup/couchflix-backup-$(date +%F).tgz -C /data .
+```
+
+You can also download your data as JSON from the app's settings (*export*).
+
+### 4. Build the image on another machine (optional)
+
+To avoid compiling on the Pi, build the arm64 image from your computer and ship it:
+
+```bash
+docker buildx build --platform linux/arm64 -t couchflix:latest --load .
+docker save couchflix:latest | gzip | ssh <user>@couchflix.local 'gunzip | docker load'
+```
+
+Then, on the Pi, use `docker compose up -d` (without `--build`).
+
+### 5. Reaching it away from home
+
+Do **not** forward port 8765 on your router: the app has no login, and anyone who reaches it can pick any profile. Instead use a private network such as [Tailscale](https://tailscale.com/download): install it on the Pi (`curl -fsSL https://tailscale.com/install.sh | sh && sudo tailscale up`) and on your phones, and open `http://<tailscale-name-or-ip>:8765`.
+
+### Tips for maximum uptime
+
+- Use Ethernet and a decent power supply (undervoltage is the most common cause of Pi instability).
+- Optionally add a small UPS and keep the SD/SSD healthy; avoid pulling the plug while it writes.
+- If you keep using a laptop instead, disable sleep: macOS `sudo pmset -a sleep 0 disablesleep 1` (or run `caffeinate -s`), Linux `sudo systemctl mask sleep.target suspend.target hibernate.target`, Windows *Power options → Never sleep* and *lid close → do nothing*.
+
 ## Configuration
 
 Through environment variables, a `.env` file in the working directory (see `.env.example`), or from the UI (settings icon at the bottom of the sidebar):

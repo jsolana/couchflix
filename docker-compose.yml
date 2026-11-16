@@ -1,0 +1,16 @@
+services:
+  couchflix:
+    build: .
+    image: couchflix:latest
+    container_name: couchflix
+    restart: unless-stopped        # arranca al encender la Pi y se reinicia si falla
+    ports:
+      - "8765:8765"
+    env_file:
+      - path: .env                 # TMDB_API_KEY, COUCHFLIX_LLM, etc. (opcional)
+        required: false
+    volumes:
+      - couchflix-data:/data       # base de datos SQLite persistente
+
+volumes:
+  couchflix-data:
